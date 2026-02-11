@@ -27,5 +27,5 @@ public class OrderItem extends AbstractBaseEntity<UUID> {
 
     private BigDecimal priceAtOrder;
 
-    private Long varientId;
+    private Long variantId;
 }
