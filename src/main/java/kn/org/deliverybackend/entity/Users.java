@@ -30,4 +30,7 @@ public class Users extends AbstractBaseEntity<UUID> {
 
     private String profileImage;
 
+    private Float latitude;
+
+    private Float longitude;
 }

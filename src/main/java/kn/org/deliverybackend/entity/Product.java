@@ -1,11 +1,9 @@
 package kn.org.deliverybackend.entity;
 
 import jakarta.persistence.*;
-import kn.org.deliverybackend.entity.base.AbstractBaseEntity;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Entity
 @Table(name = "product")
@@ -13,13 +11,16 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+public class Product {
+
 public class Product extends AbstractBaseEntity<Long> {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    private UUID categoryId;
+
+    @Column(name = "category_id")
+    private Long categoryId;
 
     private String name;
 

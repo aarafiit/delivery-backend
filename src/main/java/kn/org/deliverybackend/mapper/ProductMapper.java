@@ -1,13 +1,19 @@
 package kn.org.deliverybackend.mapper;
 
-import kn.org.deliverybackend.dto.ProductDTO;
+import kn.org.deliverybackend.dto.request.product.ProductRequestDTO;
+import kn.org.deliverybackend.dto.response.product.ProductResponseDTO;
 import kn.org.deliverybackend.entity.Product;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
+import java.math.BigDecimal;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
-    ProductDTO toDTO(Product product);
+    ProductResponseDTO toResponseDTO(Product product);
 
-    Product toEntity(ProductDTO productDTO);
+    @Mapping(target = "discountPrice", ignore = true)
+    Product toEntity(ProductRequestDTO productRequestDTO);
 }

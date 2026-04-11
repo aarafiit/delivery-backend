@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -27,9 +28,11 @@ public class UsersDTO {
 
     private String profileImage;
 
-    private Date createdAt;
+    private Float latitude;
 
-    private Date updatedAt;
+    private Float longitude;
 
-    private List<AddressesDTO> addresses;
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 }
