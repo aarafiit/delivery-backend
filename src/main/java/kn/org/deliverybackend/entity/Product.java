@@ -1,6 +1,7 @@
 package kn.org.deliverybackend.entity;
 
 import jakarta.persistence.*;
+import kn.org.deliverybackend.entity.base.AbstractBaseEntity;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -11,8 +12,6 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
-
 public class Product extends AbstractBaseEntity<Long> {
 
     @Id

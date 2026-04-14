@@ -1,5 +1,6 @@
 package kn.org.deliverybackend.mapper;
 
+import kn.org.deliverybackend.dto.CategoryDTO;
 import kn.org.deliverybackend.dto.request.category.CategoryRequestDTO;
 import kn.org.deliverybackend.dto.response.category.CategoryResponseDTO;
 import kn.org.deliverybackend.entity.Category;
@@ -17,5 +18,6 @@ public interface CategoryMapper {
     List<CategoryDTO> toDTOs(List<Category> categories);
 
     List<Category> toEntities(List<CategoryDTO> categoryDTOS);
+
     Category toEntity(CategoryRequestDTO categoryRequestDTO);
 }

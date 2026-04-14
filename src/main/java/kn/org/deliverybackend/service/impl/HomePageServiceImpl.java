@@ -1,6 +1,7 @@
 package kn.org.deliverybackend.service.impl;
 
 import kn.org.deliverybackend.dto.*;
+import kn.org.deliverybackend.dto.response.product.ProductResponseDTO;
 import kn.org.deliverybackend.entity.Category;
 import kn.org.deliverybackend.entity.Product;
 import kn.org.deliverybackend.entity.PromotionalBanner;
@@ -49,13 +50,13 @@ public class HomePageServiceImpl implements HomePageService {
         // Get popular items (limit to 10)
         List<Product> popularItems = productRepository.findTop10ByOrderByCreatedAtDesc();
         response.setPopularItems(popularItems.stream()
-                .map(productMapper::toDTO)
+                .map(productMapper::toResponseDTO)
                 .collect(Collectors.toList()));
 
         // Get featured items (limit to 8)
         List<Product> featuredItems = productRepository.findTop8ByOrderByCreatedAtDesc();
         response.setFeaturedItems(featuredItems.stream()
-                .map(productMapper::toDTO)
+                .map(productMapper::toResponseDTO)
                 .collect(Collectors.toList()));
 
         return response;
