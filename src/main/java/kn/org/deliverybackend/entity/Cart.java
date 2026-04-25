@@ -1,17 +1,11 @@
 package kn.org.deliverybackend.entity;
 
-import java.util.UUID;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import kn.org.deliverybackend.entity.base.AbstractBaseEntity;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import kn.org.deliverybackend.enumeration.StockStatus;
+import lombok.*;
+import java.math.BigDecimal;
+import java.util.UUID;
 
 @Entity
 @Table(name = "cart")
@@ -19,19 +13,27 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Cart extends AbstractBaseEntity<Long> {
+public class Cart extends AbstractBaseEntity<UUID> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private UUID id;
 
     private UUID userId;
 
-    private UUID productId;
+    private Long productId;
 
-    private Long variantId;
+    @Column(length = 150)
+    private String productName;
+
+    @Column(length = 500)
+    private String imageUrl;
+
+    @Column(precision = 19, scale = 4)
+    private BigDecimal unitPrice;
 
     private Integer quantity;
 
-    private String deliveryInstructions;
+    @Enumerated(EnumType.STRING)
+    private StockStatus stockStatus;
 }
