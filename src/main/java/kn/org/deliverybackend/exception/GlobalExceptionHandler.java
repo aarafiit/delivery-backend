@@ -16,6 +16,15 @@ import org.springframework.web.context.request.WebRequest;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+
+    // Handles resource not found errors — user, cart item, product etc. (404)
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(false, 404, ex.getMessage()));
+    }
+
     /**
      * Handles IllegalArgumentException for validation and conflict errors.
      * Returns 400 for validation errors and conflicts (username/email already exists).
@@ -84,19 +93,25 @@ public class GlobalExceptionHandler {
      */
     private static class ErrorResponse {
         private final boolean success;
+        private final int status;
         private final String error;
 
+        // Old constructor — all existing usages work without any change
         public ErrorResponse(boolean success, String error) {
             this.success = success;
+            this.status = 500;
             this.error = error;
         }
 
-        public boolean isSuccess() {
-            return success;
+        // New constructor — used for specific status codes like 404
+        public ErrorResponse(boolean success, int status, String error) {
+            this.success = success;
+            this.status = status;
+            this.error = error;
         }
 
-        public String getError() {
-            return error;
-        }
+        public boolean isSuccess() { return success; }
+        public int getStatus() { return status; }
+        public String getError() { return error; }
     }
 }
