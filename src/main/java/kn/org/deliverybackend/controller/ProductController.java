@@ -30,11 +30,6 @@ public class ProductController {
         return ResponseEntity.ok(productService.searchProducts(name));
     }
 
-    @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<ProductResponseDTO>> getProductsByCategory(@PathVariable Long categoryId) {
-        return ResponseEntity.ok(productService.getProductsByCategory(categoryId));
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getProductById(id));
@@ -42,8 +37,9 @@ public class ProductController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductResponseDTO> createProduct(
-            @Valid ProductRequestDTO productRequestDTO,
-            @RequestParam(value = "image", required = false) MultipartFile image) {
+            @Valid @RequestPart("productRequestDTO") ProductRequestDTO productRequestDTO,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+
         return ResponseEntity.ok(productService.createProduct(productRequestDTO, image));
     }
 
