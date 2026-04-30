@@ -3,6 +3,8 @@ package kn.org.deliverybackend.controller;
 import jakarta.validation.Valid;
 import kn.org.deliverybackend.dto.request.product.ProductRequestDTO;
 import kn.org.deliverybackend.dto.response.product.ProductResponseDTO;
+import kn.org.deliverybackend.dto.response.product.StockResponseDTO;
+import kn.org.deliverybackend.service.InventoryService;
 import kn.org.deliverybackend.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -19,6 +21,7 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final InventoryService inventoryService;
 
     @GetMapping
     public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
@@ -55,5 +58,11 @@ public class ProductController {
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Polling endpoint — no auth required for read
+    @GetMapping("/{id}/stock-status")
+    public ResponseEntity<StockResponseDTO> getStockStatus(@PathVariable Long id) {
+        return ResponseEntity.ok(inventoryService.getStockStatus(id));
     }
 }

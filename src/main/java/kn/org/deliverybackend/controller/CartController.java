@@ -1,6 +1,7 @@
 package kn.org.deliverybackend.controller;
 
 import kn.org.deliverybackend.dto.CartDTO;
+import kn.org.deliverybackend.dto.response.cart.CartStockValidationResult;
 import kn.org.deliverybackend.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -58,5 +59,11 @@ public class CartController {
         return ResponseEntity.ok(
                 cartService.updateDeliveryInstructions(userId, cartItemId, body.get("deliveryInstructions"))
         );
+    }
+
+    // Validate cart stock before checkout
+    @PostMapping("/{userId}/cart/validate-stock")
+    public ResponseEntity<CartStockValidationResult> validateCartStock(@PathVariable UUID userId) {
+        return ResponseEntity.ok(cartService.validateCartStock(userId));
     }
 }

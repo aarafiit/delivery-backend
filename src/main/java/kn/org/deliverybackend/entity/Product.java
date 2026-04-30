@@ -34,4 +34,10 @@ public class Product extends AbstractBaseEntity<Long> {
     private String imageUrl;
 
     private Boolean isAvailable;
+
+    @Column(name = "stock_quantity", nullable = false, columnDefinition = "int default 0 check (stock_quantity >= 0)")
+    private int stockQuantity = 0;
+
+    @Column(name = "low_stock_threshold")
+    private Integer lowStockThreshold;
 }

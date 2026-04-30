@@ -1,5 +1,7 @@
 package kn.org.deliverybackend.service;
 
+import kn.org.deliverybackend.dto.response.cart.CartStockValidationResult;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -16,4 +18,6 @@ public interface CartService {
     void removeCartItem(UUID userId, Long cartItemId);
 
     CartDTO updateDeliveryInstructions(UUID userId, Long cartItemId, String deliveryInstructions);
+
+    CartStockValidationResult validateCartStock(UUID userId);
 }

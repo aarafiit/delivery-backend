@@ -29,6 +29,8 @@ public class Cart extends AbstractBaseEntity<Long> {
 
     private UUID productId;
 
+    private Long productLongId;
+
     private Long variantId;
 
     private Integer quantity;

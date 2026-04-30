@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
+    @Mapping(target = "stockStatus", ignore = true)
     ProductResponseDTO toResponseDTO(Product product);
 
     @Mapping(target = "discountPrice", ignore = true)

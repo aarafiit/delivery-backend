@@ -1,16 +1,22 @@
 package kn.org.deliverybackend.service.impl;
 
 import kn.org.deliverybackend.dto.CartDTO;
+import kn.org.deliverybackend.dto.response.cart.CartStockValidationResult;
+import kn.org.deliverybackend.dto.response.cart.StockMismatchItem;
 import kn.org.deliverybackend.entity.Cart;
+import kn.org.deliverybackend.entity.Product;
 import kn.org.deliverybackend.exception.ResourceNotFoundException;
+import kn.org.deliverybackend.enumeration.StockStatus;
 import kn.org.deliverybackend.mapper.CartMapper;
 import kn.org.deliverybackend.repository.CartRepository;
+import kn.org.deliverybackend.repository.ProductRepository;
 import kn.org.deliverybackend.repository.UsersRepository;
 import kn.org.deliverybackend.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +29,7 @@ public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final UsersRepository usersRepository;
     private final CartMapper cartMapper;
+    private final ProductRepository productRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -98,5 +105,44 @@ public class CartServiceImpl implements CartService {
 
         cart.setDeliveryInstructions(deliveryInstructions);
         return cartMapper.toDTO(cartRepository.save(cart));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CartStockValidationResult validateCartStock(UUID userId) {
+        List<Cart> cartItems = cartRepository.findByUserId(userId);
+        List<StockMismatchItem> mismatches = new ArrayList<>();
+
+        for (Cart item : cartItems) {
+            if (item.getProductLongId() == null) {
+                continue; // skip items without a product long id reference
+            }
+            Product product = productRepository.findById(item.getProductLongId()).orElse(null);
+            if (product == null) {
+                // Product no longer exists — treat as out of stock
+                mismatches.add(new StockMismatchItem(
+                        item.getProductId(),
+                        item.getQuantity(),
+                        0,
+                        StockStatus.OUT_OF_STOCK
+                ));
+                continue;
+            }
+
+            int available = product.getStockQuantity();
+            int requested = item.getQuantity();
+
+            if (requested > available) {
+                StockStatus status = available == 0 ? StockStatus.OUT_OF_STOCK : StockStatus.LOW_STOCK;
+                mismatches.add(new StockMismatchItem(
+                        item.getProductId(),
+                        requested,
+                        available,
+                        status
+                ));
+            }
+        }
+
+        return new CartStockValidationResult(mismatches.isEmpty(), mismatches);
     }
 }
