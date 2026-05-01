@@ -21,4 +21,6 @@ public class ProductResponseDTO {
     private Boolean isAvailable;
     private int stockQuantity;
     private StockStatus stockStatus;
+    private double avgRating;
+    private int totalReviews;
 }

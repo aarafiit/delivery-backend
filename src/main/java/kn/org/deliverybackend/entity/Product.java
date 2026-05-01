@@ -40,4 +40,10 @@ public class Product extends AbstractBaseEntity<Long> {
 
     @Column(name = "low_stock_threshold")
     private Integer lowStockThreshold;
+
+    @Column(name = "avg_rating", nullable = false, columnDefinition = "double precision default 0.0")
+    private double avgRating = 0.0;
+
+    @Column(name = "total_reviews", nullable = false, columnDefinition = "int default 0")
+    private int totalReviews = 0;
 }
