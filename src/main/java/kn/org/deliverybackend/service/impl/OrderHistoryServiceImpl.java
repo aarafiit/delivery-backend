@@ -1,6 +1,7 @@
 package kn.org.deliverybackend.service.impl;
 
 import kn.org.deliverybackend.dto.OrderDTO;
+import kn.org.deliverybackend.entity.Order;
 import kn.org.deliverybackend.exception.ResourceNotFoundException;
 import kn.org.deliverybackend.mapper.OrderItemMapper;
 import kn.org.deliverybackend.mapper.OrderMapper;
@@ -64,6 +65,45 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
                         .collect(Collectors.toList())
         );
 
+        return dto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderDTO> getAllOrders() {
+        return orderRepository.findAllOrders()
+                .stream()
+                .map(this::toOrderDTOWithItems)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderDTO> getOrdersByStatus(String status) {
+        return orderRepository.findByOrderStatus(status)
+                .stream()
+                .map(this::toOrderDTOWithItems)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public OrderDTO updateOrderStatus(UUID orderId, String status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
+        order.setOrderStatus(status);
+        Order saved = orderRepository.save(order);
+        return toOrderDTOWithItems(saved);
+    }
+
+    private OrderDTO toOrderDTOWithItems(Order order) {
+        OrderDTO dto = orderMapper.toDTO(order);
+        dto.setOrderItems(
+                orderItemRepository.findByOrderId(order.getId())
+                        .stream()
+                        .map(orderItemMapper::toDTO)
+                        .collect(Collectors.toList())
+        );
         return dto;
     }
 }

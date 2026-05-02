@@ -12,4 +12,13 @@ public interface OrderHistoryService {
 
     // C-26: View order details
     OrderDTO getOrderDetails(UUID userId, UUID orderId);
+
+    // Admin: Get all orders
+    List<OrderDTO> getAllOrders();
+
+    // Admin: Get orders by status
+    List<OrderDTO> getOrdersByStatus(String status);
+
+    // Admin: Update order status
+    OrderDTO updateOrderStatus(UUID orderId, String status);
 }
