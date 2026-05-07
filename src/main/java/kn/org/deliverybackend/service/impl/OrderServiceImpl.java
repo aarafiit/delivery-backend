@@ -53,6 +53,11 @@ public class OrderServiceImpl implements OrderService {
             totalAmount = totalAmount.add(product.getPrice().multiply(BigDecimal.valueOf(requested)));
         }
 
+        // Add delivery charge to total
+        if (request.getDeliveryCharge() != null) {
+            totalAmount = totalAmount.add(BigDecimal.valueOf(request.getDeliveryCharge()));
+        }
+
         // Phase 2: deduct stock and save products
         for (int i = 0; i < items.size(); i++) {
             Product product = lockedProducts.get(i);
@@ -84,6 +89,7 @@ public class OrderServiceImpl implements OrderService {
 
             OrderItem orderItem = new OrderItem();
             orderItem.setOrderId(savedOrder.getId());
+            orderItem.setProductId(product.getId());
             orderItem.setQuantity(itemReq.getQuantity());
             orderItem.setPriceAtOrder(product.getPrice());
             orderItem.setVarientId(itemReq.getVariantId());
@@ -92,6 +98,7 @@ public class OrderServiceImpl implements OrderService {
             OrderItemDTO dto = new OrderItemDTO();
             dto.setId(savedItem.getId());
             dto.setOrderId(savedOrder.getId());
+            dto.setProductId(savedItem.getProductId());
             dto.setQuantity(savedItem.getQuantity());
             dto.setPriceAtOrder(savedItem.getPriceAtOrder());
             dto.setVariantId(savedItem.getVarientId());

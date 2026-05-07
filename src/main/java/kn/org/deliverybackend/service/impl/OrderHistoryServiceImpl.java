@@ -1,12 +1,16 @@
 package kn.org.deliverybackend.service.impl;
 
 import kn.org.deliverybackend.dto.OrderDTO;
+import kn.org.deliverybackend.dto.OrderItemDTO;
 import kn.org.deliverybackend.entity.Order;
+import kn.org.deliverybackend.entity.OrderItem;
+import kn.org.deliverybackend.entity.Product;
 import kn.org.deliverybackend.exception.ResourceNotFoundException;
 import kn.org.deliverybackend.mapper.OrderItemMapper;
 import kn.org.deliverybackend.mapper.OrderMapper;
 import kn.org.deliverybackend.repository.OrderItemRepository;
 import kn.org.deliverybackend.repository.OrderRepository;
+import kn.org.deliverybackend.repository.ProductRepository;
 import kn.org.deliverybackend.repository.UsersRepository;
 import kn.org.deliverybackend.service.OrderHistoryService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,7 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final UsersRepository usersRepository;
+    private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
 
@@ -40,7 +45,7 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
                     dto.setOrderItems(
                             orderItemRepository.findByOrderId(order.getId())
                                     .stream()
-                                    .map(orderItemMapper::toDTO)
+                                    .map(this::toEnrichedItemDTO)
                                     .collect(Collectors.toList())
                     );
                     return dto;
@@ -61,7 +66,7 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
         dto.setOrderItems(
                 orderItemRepository.findByOrderId(orderId)
                         .stream()
-                        .map(orderItemMapper::toDTO)
+                        .map(this::toEnrichedItemDTO)
                         .collect(Collectors.toList())
         );
 
@@ -101,9 +106,20 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
         dto.setOrderItems(
                 orderItemRepository.findByOrderId(order.getId())
                         .stream()
-                        .map(orderItemMapper::toDTO)
+                        .map(this::toEnrichedItemDTO)
                         .collect(Collectors.toList())
         );
+        return dto;
+    }
+
+    private OrderItemDTO toEnrichedItemDTO(OrderItem item) {
+        OrderItemDTO dto = orderItemMapper.toDTO(item);
+        if (item.getProductId() != null) {
+            productRepository.findById(item.getProductId()).ifPresent(product -> {
+                dto.setProductName(product.getName());
+                dto.setImageUrl(product.getImageUrl());
+            });
+        }
         return dto;
     }
 }
