@@ -79,6 +79,18 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
+    public AddressesDTO getAddressById(UUID userId, Long addressId) {
+
+        Optional<Addresses> address = addressesRepository.findByIdAndConsumerId(addressId, userId);
+        if (address.isEmpty()) {
+            throw new ResourceNotFoundException("Address not found with id: " + addressId);
+        }
+
+        return addressesMapper.toDTO(address.get());
+
+    }
+
+    @Override
     @Transactional
     public void deleteAddress(UUID userId, Long addressId) {
 

@@ -20,5 +20,7 @@ public class Shop extends AbstractBaseEntity<Long> {
 
     private String location;
 
-    private Long description;
+    private String description;
+
+    private String imageUrl;
 }

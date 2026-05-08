@@ -15,6 +15,8 @@ public class ShopDTO {
 
     private String location;
 
-    private Long description;
+    private String description;
+
+    private String imageUrl;
 }
 

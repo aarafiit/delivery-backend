@@ -40,6 +40,13 @@ public class AddressController {
         return ResponseEntity.ok(updatedAddress);
     }
 
+    @GetMapping("/{userId}/address/{addressId}")
+    public ResponseEntity<AddressesDTO> getAddress(
+            @PathVariable UUID userId,
+            @PathVariable Long addressId) {
+       return ResponseEntity.ok(addressService.getAddressById(userId, addressId));
+    }
+
     @DeleteMapping("/{userId}/addresses/{addressId}")
     public ResponseEntity<Void> deleteAddress(
             @PathVariable UUID userId,
