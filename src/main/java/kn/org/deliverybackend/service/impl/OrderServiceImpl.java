@@ -11,7 +11,6 @@ import kn.org.deliverybackend.event.StockUpdateEvent;
 import kn.org.deliverybackend.exception.InsufficientStockException;
 import kn.org.deliverybackend.repository.OrderItemRepository;
 import kn.org.deliverybackend.repository.OrderRepository;
-import kn.org.deliverybackend.repository.ProductRepository;
 import kn.org.deliverybackend.service.InventoryService;
 import kn.org.deliverybackend.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +28,6 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
-    private final ProductRepository productRepository;
     private final InventoryService inventoryService;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -40,10 +38,10 @@ public class OrderServiceImpl implements OrderService {
         List<Product> lockedProducts = new ArrayList<>();
         List<OrderItemRequestDTO> items = request.getItems();
 
-        // Phase 1: lock all products and validate stock
+        // Phase 1: lock all products via inventory and validate stock
         for (OrderItemRequestDTO item : items) {
             Product product = inventoryService.lockAndGetProduct(item.getProductId());
-            int available = product.getStockQuantity();
+            int available = inventoryService.getAvailableStock(item.getProductId());
             int requested = item.getQuantity();
 
             if (available < requested) {
@@ -58,12 +56,12 @@ public class OrderServiceImpl implements OrderService {
             totalAmount = totalAmount.add(BigDecimal.valueOf(request.getDeliveryCharge()));
         }
 
-        // Phase 2: deduct stock and save products
+        // Phase 2: deduct stock via inventory table and publish events
         for (int i = 0; i < items.size(); i++) {
             Product product = lockedProducts.get(i);
-            int newQty = product.getStockQuantity() - items.get(i).getQuantity();
-            product.setStockQuantity(newQty);
-            productRepository.save(product);
+            int qty = items.get(i).getQuantity();
+            inventoryService.decrementStock(product, qty);
+            int newQty = inventoryService.getAvailableStock(product.getId());
             eventPublisher.publishEvent(new StockUpdateEvent(this, product.getId(), newQty,
                     inventoryService.computeStatus(product)));
         }

@@ -43,6 +43,28 @@ public class BannerServiceImpl implements BannerService {
     }
 
     @Override
+    public PromotionalBannerDTO updateBanner(UUID id, MultipartFile image, String promotionTitle, String promotionDetails, String fromDate, String toDate) {
+        PromotionalBanner banner = bannerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Banner not found with id: " + id));
+
+        // Replace image only if a new one is provided
+        if (image != null && !image.isEmpty()) {
+            if (banner.getImageUrl() != null) {
+                String fileName = banner.getImageUrl().substring(banner.getImageUrl().lastIndexOf("/") + 1);
+                bannerStorageService.deleteBanner(fileName);
+            }
+            banner.setImageUrl(bannerStorageService.uploadBanner(image));
+        }
+
+        if (promotionTitle != null) banner.setPromotionTitle(promotionTitle);
+        if (promotionDetails != null) banner.setPromotionDetails(promotionDetails);
+        if (fromDate != null) banner.setFromDate(LocalDate.parse(fromDate));
+        if (toDate != null) banner.setToDate(LocalDate.parse(toDate));
+
+        return toDTO(bannerRepository.save(banner));
+    }
+
+    @Override
     public void deleteBanner(UUID id) {
         PromotionalBanner banner = bannerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Banner not found with id: " + id));

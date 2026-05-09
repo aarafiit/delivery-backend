@@ -14,11 +14,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserRider extends AbstractBaseEntity<UUID> {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    
+
     private String name;
 
     private String contactNo;
@@ -38,6 +38,12 @@ public class UserRider extends AbstractBaseEntity<UUID> {
     private String contactPhone;
 
     private String status;
+
+    private String vehicleType;
+
+    private String plateNumber;
+
+    private Double rating;
 
     private LocalDateTime approvedAt;
 }

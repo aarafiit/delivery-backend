@@ -1,6 +1,7 @@
 package kn.org.deliverybackend.controller;
 
 import kn.org.deliverybackend.dto.OrderDTO;
+import kn.org.deliverybackend.dto.OrderSummaryDTO;
 import kn.org.deliverybackend.service.OrderHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,11 @@ import java.util.UUID;
 public class AdminOrderController {
 
     private final OrderHistoryService orderHistoryService;
+
+    @GetMapping("/summary")
+    public ResponseEntity<OrderSummaryDTO> getSummary() {
+        return ResponseEntity.ok(orderHistoryService.getSummary());
+    }
 
     @GetMapping
     public ResponseEntity<List<OrderDTO>> getAllOrders() {

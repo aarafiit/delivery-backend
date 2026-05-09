@@ -2,8 +2,10 @@ package kn.org.deliverybackend.service.impl;
 
 import kn.org.deliverybackend.dto.request.product.ProductRequestDTO;
 import kn.org.deliverybackend.dto.response.product.ProductResponseDTO;
+import kn.org.deliverybackend.entity.Inventory;
 import kn.org.deliverybackend.entity.Product;
 import kn.org.deliverybackend.mapper.ProductMapper;
+import kn.org.deliverybackend.repository.InventoryRepository;
 import kn.org.deliverybackend.repository.ProductRepository;
 import kn.org.deliverybackend.service.FileStorageService;
 import kn.org.deliverybackend.service.InventoryService;
@@ -25,6 +27,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
     private final FileStorageService fileStorageService;
     private final InventoryService inventoryService;
+    private final InventoryRepository inventoryRepository;
 
     @Override
     public List<ProductResponseDTO> searchProducts(String name) {
@@ -64,7 +67,19 @@ public class ProductServiceImpl implements ProductService {
         }
 
         calculateAndSetDiscountPrice(product, productRequestDTO);
-        return toEnrichedResponseDTO(productRepository.save(product));
+        if (productRequestDTO.getLowStockThreshold() != null) {
+            product.setLowStockThreshold(productRequestDTO.getLowStockThreshold());
+        }
+        Product saved = productRepository.save(product);
+
+        // Auto-create inventory row for the new product (starts at 0 stock)
+        Inventory inventory = new Inventory();
+        inventory.setProductId(saved.getId());
+        inventory.setStockQuantity(0);
+        inventory.setUnit(productRequestDTO.getUnit());
+        inventoryRepository.save(inventory);
+
+        return toEnrichedResponseDTO(saved);
     }
 
     @Override
@@ -87,6 +102,10 @@ public class ProductServiceImpl implements ProductService {
             product.setImageUrl(productRequestDTO.getImageUrl());
         }
         product.setIsAvailable(productRequestDTO.getIsAvailable());
+        if (productRequestDTO.getUnit() != null) product.setUnit(productRequestDTO.getUnit());
+        if (productRequestDTO.getLowStockThreshold() != null) {
+            product.setLowStockThreshold(productRequestDTO.getLowStockThreshold());
+        }
 
         return toEnrichedResponseDTO(productRepository.save(product));
     }

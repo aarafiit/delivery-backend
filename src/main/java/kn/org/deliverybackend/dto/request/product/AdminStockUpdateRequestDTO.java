@@ -14,4 +14,11 @@ public class AdminStockUpdateRequestDTO {
     @NotNull(message = "Quantity must not be null")
     @Min(value = 0, message = "Quantity must be >= 0")
     private Integer quantity;
+
+    /** Optional — if provided, updates the unit label on the inventory row */
+    private String unit;
+
+    /** Optional — if provided, updates the low stock threshold */
+    @Min(value = 0, message = "Low stock threshold must be >= 0")
+    private Integer lowStockThreshold;
 }

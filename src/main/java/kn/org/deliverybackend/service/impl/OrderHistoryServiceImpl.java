@@ -2,15 +2,18 @@ package kn.org.deliverybackend.service.impl;
 
 import kn.org.deliverybackend.dto.OrderDTO;
 import kn.org.deliverybackend.dto.OrderItemDTO;
+import kn.org.deliverybackend.dto.OrderSummaryDTO;
 import kn.org.deliverybackend.entity.Order;
 import kn.org.deliverybackend.entity.OrderItem;
 import kn.org.deliverybackend.entity.Product;
+import kn.org.deliverybackend.entity.Users;
 import kn.org.deliverybackend.exception.ResourceNotFoundException;
 import kn.org.deliverybackend.mapper.OrderItemMapper;
 import kn.org.deliverybackend.mapper.OrderMapper;
 import kn.org.deliverybackend.repository.OrderItemRepository;
 import kn.org.deliverybackend.repository.OrderRepository;
 import kn.org.deliverybackend.repository.ProductRepository;
+import kn.org.deliverybackend.repository.UserRiderRepository;
 import kn.org.deliverybackend.repository.UsersRepository;
 import kn.org.deliverybackend.service.OrderHistoryService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +31,7 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final UsersRepository usersRepository;
+    private final UserRiderRepository userRiderRepository;
     private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
@@ -48,6 +52,10 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
                                     .map(this::toEnrichedItemDTO)
                                     .collect(Collectors.toList())
                     );
+                    usersRepository.findById(userId).ifPresent(user -> {
+                        dto.setCustomerName(buildName(user));
+                        dto.setCustomerPhone(user.getPhoneNumber());
+                    });
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -101,6 +109,18 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
         return toOrderDTOWithItems(saved);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public OrderSummaryDTO getSummary() {
+        List<Order> all = orderRepository.findAllOrders();
+        long total = all.size();
+        long pending = all.stream().filter(o -> "PENDING".equalsIgnoreCase(o.getOrderStatus())).count();
+        long outForDelivery = all.stream().filter(o -> "OUT_FOR_DELIVERY".equalsIgnoreCase(o.getOrderStatus())).count();
+        long completed = all.stream().filter(o -> "DELIVERED".equalsIgnoreCase(o.getOrderStatus())
+                || "COMPLETED".equalsIgnoreCase(o.getOrderStatus())).count();
+        return new OrderSummaryDTO(total, pending, outForDelivery, completed);
+    }
+
     private OrderDTO toOrderDTOWithItems(Order order) {
         OrderDTO dto = orderMapper.toDTO(order);
         dto.setOrderItems(
@@ -109,7 +129,33 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
                         .map(this::toEnrichedItemDTO)
                         .collect(Collectors.toList())
         );
+        // Enrich with customer info
+        if (order.getClientId() != null) {
+            usersRepository.findById(order.getClientId()).ifPresent(user -> {
+                String name = buildName(user);
+                dto.setCustomerName(name);
+                dto.setCustomerPhone(user.getPhoneNumber());
+            });
+        }
+        // Enrich with rider info
+        if (order.getRiderId() != null) {
+            userRiderRepository.findById(order.getRiderId()).ifPresent(rider -> {
+                dto.setRiderName(rider.getName());
+                dto.setRiderPhone(rider.getContactPhone() != null ? rider.getContactPhone() : rider.getContactNo());
+                dto.setRiderImageUrl(rider.getImageUrl());
+                dto.setRiderVehicleType(rider.getVehicleType());
+                dto.setRiderPlateNumber(rider.getPlateNumber());
+                dto.setRiderRating(rider.getRating());
+            });
+        }
         return dto;
+    }
+
+    private String buildName(Users user) {
+        String first = user.getFirstName() != null ? user.getFirstName() : "";
+        String last = user.getLastName() != null ? user.getLastName() : "";
+        String full = (first + " " + last).trim();
+        return full.isEmpty() ? user.getPhoneNumber() : full;
     }
 
     private OrderItemDTO toEnrichedItemDTO(OrderItem item) {

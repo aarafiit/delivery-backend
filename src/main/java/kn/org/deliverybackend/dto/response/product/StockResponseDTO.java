@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 public class StockResponseDTO {
     private Long productId;
     private String productName;
+    private String sku;
+    private String imageUrl;
+    private String unit;
     private int stockQuantity;
     private StockStatus stockStatus;
     private Integer lowStockThreshold;
