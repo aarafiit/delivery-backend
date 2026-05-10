@@ -4,6 +4,7 @@ import kn.org.deliverybackend.dto.OrderDTO;
 import kn.org.deliverybackend.dto.OrderSummaryDTO;
 import kn.org.deliverybackend.service.OrderHistoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,16 @@ public class AdminOrderController {
     @GetMapping
     public ResponseEntity<List<OrderDTO>> getAllOrders() {
         return ResponseEntity.ok(orderHistoryService.getAllOrders());
+    }
+
+    @GetMapping("/paged")
+    public ResponseEntity<Page<OrderDTO>> getOrdersPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate) {
+        return ResponseEntity.ok(orderHistoryService.getOrdersPaged(page, size, status, fromDate, toDate));
     }
 
     @GetMapping("/status/{status}")

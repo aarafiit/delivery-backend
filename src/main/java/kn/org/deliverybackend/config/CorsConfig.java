@@ -3,6 +3,7 @@ package kn.org.deliverybackend.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
@@ -12,15 +13,10 @@ import java.util.List;
 public class CorsConfig {
 
     @Bean
-    public CorsFilter corsFilter() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-
-        // Allow all origins — change to specific origins in production
-        // e.g. config.setAllowedOrigins(List.of("http://localhost:4200", "https://admin.yourdomain.com"));
         config.setAllowedOriginPatterns(List.of("*"));
-
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-
         config.setAllowedHeaders(List.of(
                 "Authorization",
                 "Content-Type",
@@ -30,17 +26,17 @@ public class CorsConfig {
                 "Access-Control-Request-Method",
                 "Access-Control-Request-Headers"
         ));
-
         config.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
-
         config.setAllowCredentials(true);
-
-        // Cache preflight response for 1 hour
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 
-        return new CorsFilter(source);
+    @Bean
+    public CorsFilter corsFilter() {
+        return new CorsFilter(corsConfigurationSource());
     }
 }

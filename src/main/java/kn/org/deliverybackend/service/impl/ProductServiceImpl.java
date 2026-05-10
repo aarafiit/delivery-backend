@@ -5,12 +5,16 @@ import kn.org.deliverybackend.dto.response.product.ProductResponseDTO;
 import kn.org.deliverybackend.entity.Inventory;
 import kn.org.deliverybackend.entity.Product;
 import kn.org.deliverybackend.mapper.ProductMapper;
+import kn.org.deliverybackend.repository.CategoryRepository;
 import kn.org.deliverybackend.repository.InventoryRepository;
 import kn.org.deliverybackend.repository.ProductRepository;
 import kn.org.deliverybackend.service.FileStorageService;
 import kn.org.deliverybackend.service.InventoryService;
 import kn.org.deliverybackend.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,6 +32,7 @@ public class ProductServiceImpl implements ProductService {
     private final FileStorageService fileStorageService;
     private final InventoryService inventoryService;
     private final InventoryRepository inventoryRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public List<ProductResponseDTO> searchProducts(String name) {
@@ -48,6 +53,12 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findAll().stream()
                 .map(this::toEnrichedResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<ProductResponseDTO> getProductsPaged(int page, int size) {
+        return productRepository.findAll(PageRequest.of(page, size, Sort.by("id").descending()))
+                .map(this::toEnrichedResponseDTO);
     }
 
     @Override
@@ -113,6 +124,13 @@ public class ProductServiceImpl implements ProductService {
     private ProductResponseDTO toEnrichedResponseDTO(Product product) {
         ProductResponseDTO dto = productMapper.toResponseDTO(product);
         dto.setStockStatus(inventoryService.computeStatus(product));
+        dto.setSku(product.getSku());
+        dto.setUnit(product.getUnit());
+        // Enrich with category name
+        if (product.getCategoryId() != null) {
+            categoryRepository.findById(product.getCategoryId())
+                    .ifPresent(cat -> dto.setCategoryName(cat.getName()));
+        }
         return dto;
     }
 

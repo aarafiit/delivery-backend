@@ -13,6 +13,9 @@ import java.math.BigDecimal;
 public class ProductResponseDTO {
     private Long id;
     private Long categoryId;
+    private String categoryName;
+    private String sku;
+    private String unit;
     private String name;
     private String description;
     private BigDecimal price;

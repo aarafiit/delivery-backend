@@ -8,6 +8,10 @@ import kn.org.deliverybackend.entity.OrderItem;
 import kn.org.deliverybackend.entity.Product;
 import kn.org.deliverybackend.entity.Users;
 import kn.org.deliverybackend.exception.ResourceNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import kn.org.deliverybackend.mapper.OrderItemMapper;
 import kn.org.deliverybackend.mapper.OrderMapper;
 import kn.org.deliverybackend.repository.OrderItemRepository;
@@ -79,6 +83,22 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
         );
 
         return dto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<OrderDTO> getOrdersPaged(int page, int size, String status, String fromDate, String toDate) {
+        PageRequest pageable = PageRequest.of(page, size);
+        String statusParam = (status != null && !status.isBlank() && !status.equalsIgnoreCase("ALL"))
+                ? status.toUpperCase() : null;
+
+        // Pass ISO date strings directly; null means no filter
+        String from = (fromDate != null && !fromDate.isBlank()) ? fromDate : null;
+        // End of day for toDate
+        String to = (toDate != null && !toDate.isBlank()) ? toDate + " 23:59:59" : null;
+
+        return orderRepository.findOrdersFiltered(statusParam, from, to, pageable)
+                .map(this::toOrderDTOWithItems);
     }
 
     @Override

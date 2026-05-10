@@ -7,6 +7,7 @@ import kn.org.deliverybackend.dto.response.product.StockResponseDTO;
 import kn.org.deliverybackend.service.InventoryService;
 import kn.org.deliverybackend.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,13 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
+    }
+
+    @GetMapping("/paged")
+    public ResponseEntity<Page<ProductResponseDTO>> getProductsPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(productService.getProductsPaged(page, size));
     }
 
     @GetMapping("/search")
