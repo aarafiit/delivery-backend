@@ -40,4 +40,16 @@ public class OrderDTO {
     private Float longitude;
 
     private List<OrderItemDTO> orderItems;
+
+    // Enriched customer info (populated from Users table)
+    private String customerName;
+    private String customerPhone;
+
+    // Enriched rider info (populated from UserRider table)
+    private String riderName;
+    private String riderPhone;
+    private String riderImageUrl;
+    private String riderVehicleType;
+    private String riderPlateNumber;
+    private Double riderRating;
 }

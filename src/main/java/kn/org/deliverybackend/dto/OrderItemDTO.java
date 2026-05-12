@@ -16,7 +16,11 @@ public class OrderItemDTO {
 
     private UUID orderId;
 
-    private UUID productId;
+    private Long productId;
+
+    private String productName;
+
+    private String imageUrl;
 
     private Integer quantity;
 

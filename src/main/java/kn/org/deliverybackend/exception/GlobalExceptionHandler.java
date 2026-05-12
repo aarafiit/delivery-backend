@@ -2,116 +2,132 @@ package kn.org.deliverybackend.exception;
 
 import kn.org.deliverybackend.dto.response.auth.LoginResponse;
 import kn.org.deliverybackend.dto.response.auth.RegistrationResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
-/**
- * Global exception handler for the authentication system.
- * Handles validation errors (400), conflicts (400), authentication failures (401),
- * and server errors (500) with consistent error response format.
- */
-@ControllerAdvice
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // ── Stock exceptions ──────────────────────────────────────────────────────
 
-    // Handles resource not found errors — user, cart item, product etc. (404)
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse(false, 404, ex.getMessage()));
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<Map<String, Object>> handleInsufficientStock(
+            InsufficientStockException ex) {
+        log.warn("Insufficient stock: productId={}, requested={}, available={}",
+                ex.getProductId(), ex.getRequested(), ex.getAvailable());
+        Map<String, Object> body = new HashMap<>();
+        body.put("productId", ex.getProductId());
+        body.put("requested", ex.getRequested());
+        body.put("available", ex.getAvailable());
+        body.put("message", ex.getMessage());
+        body.put("timestamp", LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
-    /**
-     * Handles IllegalArgumentException for validation and conflict errors.
-     * Returns 400 for validation errors and conflicts (username/email already exists).
-     * Returns 401 for authentication failures (invalid credentials).
-     */
+    @ExceptionHandler(InvalidStockOperationException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidStockOperation(
+            InvalidStockOperationException ex) {
+        log.warn("Invalid stock operation: {}", ex.getMessage());
+        Map<String, Object> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        body.put("timestamp", LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(PessimisticLockingFailureException.class)
+    public ResponseEntity<Map<String, Object>> handlePessimisticLock(
+            PessimisticLockingFailureException ex) {
+        log.warn("Pessimistic lock contention: {}", ex.getMessage());
+        Map<String, Object> body = new HashMap<>();
+        body.put("message", "Item temporarily unavailable, please retry");
+        body.put("timestamp", LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleResourceNotFound(
+            ResourceNotFoundException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        body.put("timestamp", LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    // ── Review exceptions ─────────────────────────────────────────────────────
+
+    @ExceptionHandler(UnauthorizedReviewException.class)
+    public ResponseEntity<Map<String, Object>> handleUnauthorizedReview(
+            UnauthorizedReviewException ex) {
+        log.warn("Unauthorized review attempt: {}", ex.getMessage());
+        Map<String, Object> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        body.put("timestamp", LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateResource(
+            DuplicateResourceException ex) {
+        log.warn("Duplicate resource: {}", ex.getMessage());
+        Map<String, Object> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        body.put("timestamp", LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidation(
+            MethodArgumentNotValidException ex) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        for (FieldError fe : ex.getBindingResult().getFieldErrors()) {
+            fieldErrors.put(fe.getField(), fe.getDefaultMessage());
+        }
+        Map<String, Object> body = new HashMap<>();
+        body.put("errors", fieldErrors);
+        body.put("timestamp", LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    // ── Auth exceptions (required by existing tests) ─────────────────────────
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleIllegalArgumentException(
-            IllegalArgumentException ex,
-            WebRequest request) {
-
-        String errorMessage = ex.getMessage();
-        String path = request.getDescription(false).replace("uri=", "");
-
-        // Determine if this is an authentication failure (401) or validation/conflict error (400)
-        if (errorMessage.contains("Invalid credentials")) {
-            // Authentication failure - return 401
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(createErrorResponse(errorMessage, path));
-        } else {
-            // Validation or conflict error - return 400
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(createErrorResponse(errorMessage, path));
-        }
-    }
-
-    /**
-     * Handles all other unexpected exceptions as server errors.
-     * Returns 500 with generic error message to avoid exposing internal details.
-     */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGlobalException(
-            Exception ex,
-            WebRequest request) {
-
-        String path = request.getDescription(false).replace("uri=", "");
-
-        // Log the actual exception for debugging (in production, use proper logging)
-        System.err.println("Internal server error: " + ex.getMessage());
-        ex.printStackTrace();
-
-        // Return generic error message to client
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(createErrorResponse("Internal server error", path));
-    }
-
-    /**
-     * Creates an appropriate error response based on the request path.
-     * Returns LoginResponse for /login endpoint, RegistrationResponse for /register endpoint.
-     */
-    private Object createErrorResponse(String errorMessage, String path) {
+            IllegalArgumentException ex, WebRequest request) {
+        String path = request.getDescription(false);
         if (path.contains("/login")) {
-            return LoginResponse.error(errorMessage);
-        } else if (path.contains("/register")) {
-            return RegistrationResponse.error(errorMessage);
-        } else {
-            // Generic error response for other endpoints
-            return new ErrorResponse(false, errorMessage);
+            String msg = ex.getMessage();
+            if (msg != null && msg.toLowerCase().contains("invalid credentials")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(LoginResponse.error(msg));
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(LoginResponse.error(msg));
         }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(RegistrationResponse.error(ex.getMessage()));
     }
 
-    /**
-     * Generic error response DTO for endpoints without specific response types.
-     */
-    private static class ErrorResponse {
-        private final boolean success;
-        private final int status;
-        private final String error;
-
-        // Old constructor — all existing usages work without any change
-        public ErrorResponse(boolean success, String error) {
-            this.success = success;
-            this.status = 500;
-            this.error = error;
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> handleGlobalException(Exception ex, WebRequest request) {
+        log.error("Unhandled exception: {}", ex.getMessage(), ex);
+        String path = request.getDescription(false);
+        if (path.contains("/login")) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(LoginResponse.error("Internal server error"));
         }
-
-        // New constructor — used for specific status codes like 404
-        public ErrorResponse(boolean success, int status, String error) {
-            this.success = success;
-            this.status = status;
-            this.error = error;
-        }
-
-        public boolean isSuccess() { return success; }
-        public int getStatus() { return status; }
-        public String getError() { return error; }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(RegistrationResponse.error("Internal server error"));
     }
 }

@@ -21,7 +21,7 @@ public class OrderItem extends AbstractBaseEntity<UUID> {
     
     private UUID orderId;
 
-    private UUID productId;
+    private Long productId;
 
     private Integer quantity;
 

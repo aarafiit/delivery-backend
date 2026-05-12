@@ -1,11 +1,11 @@
 package kn.org.deliverybackend.dto.response.product;
 
+import kn.org.deliverybackend.enumeration.StockStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -13,10 +13,17 @@ import java.time.LocalDateTime;
 public class ProductResponseDTO {
     private Long id;
     private Long categoryId;
+    private String categoryName;
+    private String sku;
+    private String unit;
     private String name;
     private String description;
     private BigDecimal price;
     private BigDecimal discountPrice;
     private String imageUrl;
     private Boolean isAvailable;
+    private int stockQuantity;
+    private StockStatus stockStatus;
+    private double avgRating;
+    private int totalReviews;
 }

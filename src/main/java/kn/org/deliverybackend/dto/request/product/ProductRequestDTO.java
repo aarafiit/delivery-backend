@@ -35,6 +35,11 @@ public class ProductRequestDTO {
 
     private String imageUrl;
 
+    private String unit; // e.g. kg, packets, items, litre
+
     @NotNull(message = "Availability status is required")
     private Boolean isAvailable;
+
+    @Min(value = 0, message = "Low stock threshold must be >= 0")
+    private Integer lowStockThreshold;
 }

@@ -3,8 +3,11 @@ package kn.org.deliverybackend.controller;
 import jakarta.validation.Valid;
 import kn.org.deliverybackend.dto.request.product.ProductRequestDTO;
 import kn.org.deliverybackend.dto.response.product.ProductResponseDTO;
+import kn.org.deliverybackend.dto.response.product.StockResponseDTO;
+import kn.org.deliverybackend.service.InventoryService;
 import kn.org.deliverybackend.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,20 +22,23 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final InventoryService inventoryService;
 
     @GetMapping
     public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
+    @GetMapping("/paged")
+    public ResponseEntity<Page<ProductResponseDTO>> getProductsPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(productService.getProductsPaged(page, size));
+    }
+
     @GetMapping("/search")
     public ResponseEntity<List<ProductResponseDTO>> searchProducts(@RequestParam String name) {
         return ResponseEntity.ok(productService.searchProducts(name));
-    }
-
-    @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<ProductResponseDTO>> getProductsByCategory(@PathVariable Long categoryId) {
-        return ResponseEntity.ok(productService.getProductsByCategory(categoryId));
     }
 
     @GetMapping("/{id}")
@@ -42,8 +48,9 @@ public class ProductController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductResponseDTO> createProduct(
-            @Valid ProductRequestDTO productRequestDTO,
-            @RequestParam(value = "image", required = false) MultipartFile image) {
+            @Valid @RequestPart("productRequestDTO") ProductRequestDTO productRequestDTO,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+
         return ResponseEntity.ok(productService.createProduct(productRequestDTO, image));
     }
 
@@ -59,5 +66,11 @@ public class ProductController {
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Polling endpoint — no auth required for read
+    @GetMapping("/{id}/stock-status")
+    public ResponseEntity<StockResponseDTO> getStockStatus(@PathVariable Long id) {
+        return ResponseEntity.ok(inventoryService.getStockStatus(id));
     }
 }

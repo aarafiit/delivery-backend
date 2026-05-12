@@ -7,6 +7,7 @@ import kn.org.deliverybackend.entity.Cart;
 import kn.org.deliverybackend.enumeration.StockStatus;
 import kn.org.deliverybackend.exception.ResourceNotFoundException;
 import kn.org.deliverybackend.repository.CartRepository;
+import kn.org.deliverybackend.repository.ProductRepository;
 import kn.org.deliverybackend.repository.UsersRepository;
 import kn.org.deliverybackend.service.CartService;
 import lombok.RequiredArgsConstructor;
