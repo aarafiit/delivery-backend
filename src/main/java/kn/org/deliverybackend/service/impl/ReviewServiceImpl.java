@@ -190,6 +190,32 @@ public class ReviewServiceImpl implements ReviewService {
         productRepository.save(product);
     }
 
+    @Override
+    @Transactional
+    public void adminDeleteReview(Long productId, UUID reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Review not found with id: " + reviewId));
+
+        if (review.getDeleted()) {
+            throw new ResourceNotFoundException("Review not found with id: " + reviewId);
+        }
+
+        int oldRating = review.getRating();
+        review.setDeleted(true);
+        reviewRepository.save(review);
+
+        Product product = productRepository.findByIdWithLock(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+
+        int newTotal = product.getTotalReviews() - 1;
+        double newAvg = newTotal > 0
+                ? ((product.getAvgRating() * product.getTotalReviews()) - oldRating) / newTotal
+                : 0.0;
+        product.setAvgRating(newAvg);
+        product.setTotalReviews(newTotal);
+        productRepository.save(product);
+    }
+
     private ReviewResponseDTO toResponseDTO(Review review, UUID userId) {
         String userName = usersRepository.findById(userId)
                 .map(u -> {

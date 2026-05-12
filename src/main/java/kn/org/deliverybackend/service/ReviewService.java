@@ -15,4 +15,7 @@ public interface ReviewService {
     RatingSummaryDTO getRatingSummary(Long productId);
     ReviewResponseDTO updateReview(Long productId, UUID reviewId, ReviewUpdateRequestDTO request);
     void deleteReview(Long productId, UUID reviewId, UUID requestingUserId);
+
+    /** Admin delete — no user ownership check */
+    void adminDeleteReview(Long productId, UUID reviewId);
 }
