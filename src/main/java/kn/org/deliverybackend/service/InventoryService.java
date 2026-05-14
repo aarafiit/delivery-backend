@@ -22,9 +22,7 @@ public interface InventoryService {
 
     void decrementStock(Product product, int quantity);
 
-    /** Returns all products with their stock details (for the inventory list page). */
     List<StockResponseDTO> getAllStockDetails();
 
-    /** Returns summary counts for the 3 summary cards. */
     InventorySummaryDTO getSummary();
 }

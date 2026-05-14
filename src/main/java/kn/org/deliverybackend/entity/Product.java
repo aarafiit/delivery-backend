@@ -28,7 +28,7 @@ public class Product extends AbstractBaseEntity<Long> {
     @Column(unique = true)
     private String sku;
 
-    private String unit; // e.g. kg, packets, items, litre
+    private String unit;
 
     private BigDecimal price;
 
@@ -52,10 +52,6 @@ public class Product extends AbstractBaseEntity<Long> {
     @Column(name = "total_reviews", nullable = false, columnDefinition = "int default 0")
     private int totalReviews = 0;
 
-    /**
-     * Generates SKU after the entity is first persisted and the ID is assigned.
-     * Format: first 2 uppercase letters of name + "-" + zero-padded ID (e.g. CH-00001)
-     */
     @PostPersist
     public void generateSku() {
         if (this.sku == null) {

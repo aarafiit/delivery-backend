@@ -14,7 +14,7 @@ import java.util.UUID;
 @Schema(description = "DTO for address information")
 public class AddressesDTO {
 
-    private Long id;
+    private UUID id;
     private String name;
     private String address;
     private Float latitude;

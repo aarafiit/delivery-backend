@@ -30,7 +30,7 @@ public class Inventory {
     private Integer lowStockThreshold;
 
     @Column(name = "unit")
-    private String unit; // mirrors product unit for convenience
+    private String unit;
 
     @UpdateTimestamp
     @Column(name = "last_updated")

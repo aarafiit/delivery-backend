@@ -17,4 +17,3 @@ public class ShopDTO {
 
     private Long description;
 }
-

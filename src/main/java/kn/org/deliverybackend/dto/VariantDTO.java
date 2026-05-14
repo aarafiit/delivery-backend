@@ -21,4 +21,3 @@ public class VariantDTO {
 
     private Long shopId;
 }
-

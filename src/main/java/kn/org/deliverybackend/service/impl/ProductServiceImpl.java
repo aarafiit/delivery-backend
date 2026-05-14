@@ -4,6 +4,7 @@ import kn.org.deliverybackend.dto.request.product.ProductRequestDTO;
 import kn.org.deliverybackend.dto.response.product.ProductResponseDTO;
 import kn.org.deliverybackend.entity.Inventory;
 import kn.org.deliverybackend.entity.Product;
+
 import kn.org.deliverybackend.mapper.ProductMapper;
 import kn.org.deliverybackend.repository.CategoryRepository;
 import kn.org.deliverybackend.repository.InventoryRepository;

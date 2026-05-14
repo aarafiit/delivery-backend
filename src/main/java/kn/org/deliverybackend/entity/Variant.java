@@ -11,11 +11,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Variant extends AbstractBaseEntity<Long> {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     private Long productId;
 
     private Long categoryId;
@@ -25,5 +25,4 @@ public class Variant extends AbstractBaseEntity<Long> {
     private String name;
 
     private Long shopId;
-
 }

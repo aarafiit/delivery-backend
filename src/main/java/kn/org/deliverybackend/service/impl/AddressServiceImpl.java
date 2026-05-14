@@ -59,7 +59,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public AddressesDTO updateAddress(UUID userId, Long addressId, AddressesDTO addressesDTO) {
+    public AddressesDTO updateAddress(UUID userId, UUID addressId, AddressesDTO addressesDTO) {
 
         Optional<Users> user = usersRepository.findById(userId);
         if (user.isEmpty()) {
@@ -80,7 +80,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    public void deleteAddress(UUID userId, Long addressId) {
+    public void deleteAddress(UUID userId, UUID addressId) {
 
         Optional<Users> user = usersRepository.findById(userId);
         if (user.isEmpty()) {

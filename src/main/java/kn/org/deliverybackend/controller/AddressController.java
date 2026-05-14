@@ -64,7 +64,7 @@ public class AddressController {
     })
     public ResponseEntity<AddressesDTO> updateAddress(
             @PathVariable UUID userId,
-            @PathVariable Long addressId,
+            @PathVariable UUID addressId,
             @RequestBody AddressesDTO addressesDTO) {
         AddressesDTO updatedAddress = addressService.updateAddress(userId, addressId, addressesDTO);
         return ResponseEntity.ok(updatedAddress);
@@ -79,7 +79,7 @@ public class AddressController {
     })
     public ResponseEntity<Void> deleteAddress(
             @PathVariable UUID userId,
-            @PathVariable Long addressId) {
+            @PathVariable UUID addressId) {
         addressService.deleteAddress(userId, addressId);
         return ResponseEntity.noContent().build();
     }

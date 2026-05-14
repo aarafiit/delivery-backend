@@ -14,13 +14,13 @@ import java.time.LocalDateTime;
 public class CategoryDTO {
     @Schema(description = "Category ID", example = "1")
     private Long id;
-    
+
     @Schema(description = "Category name", example = "Electronics")
     private String name;
-    
+
     @Schema(description = "Indicates if category is active", example = "true")
     private Boolean isActive;
-    
+
     @Schema(description = "Creation timestamp")
     private LocalDateTime createdAt;
 }

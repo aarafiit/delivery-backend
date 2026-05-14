@@ -4,17 +4,19 @@ import jakarta.persistence.*;
 import kn.org.deliverybackend.entity.base.AbstractBaseEntity;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "admin_user")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminUser extends AbstractBaseEntity<Long> {
-    
+public class AdminUser extends AbstractBaseEntity<UUID> {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     
     private String userName;
 
