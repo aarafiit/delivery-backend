@@ -26,4 +26,6 @@ public interface CartRepository extends JpaRepository<Cart, UUID> {
     // Count total active cart items for bottom navigation badge (FR-07-12)
     @Query("SELECT COUNT(c) FROM Cart c WHERE c.userId = :userId AND c.deleted = false")
     long countByUserId(UUID userId);
+
+    void deleteByUserId(UUID userId);
 }

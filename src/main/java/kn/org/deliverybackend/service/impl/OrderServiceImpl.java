@@ -9,6 +9,7 @@ import kn.org.deliverybackend.entity.OrderItem;
 import kn.org.deliverybackend.entity.Product;
 import kn.org.deliverybackend.event.StockUpdateEvent;
 import kn.org.deliverybackend.exception.InsufficientStockException;
+import kn.org.deliverybackend.repository.CartRepository;
 import kn.org.deliverybackend.repository.OrderItemRepository;
 import kn.org.deliverybackend.repository.OrderRepository;
 import kn.org.deliverybackend.service.InventoryService;
@@ -30,6 +31,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepository orderItemRepository;
     private final InventoryService inventoryService;
     private final ApplicationEventPublisher eventPublisher;
+    private final CartRepository cartRepository;
 
     @Override
     @Transactional
@@ -115,6 +117,12 @@ public class OrderServiceImpl implements OrderService {
         orderDTO.setTotalAmount(savedOrder.getTotalAmount());
         orderDTO.setOrderStatus(savedOrder.getOrderStatus());
         orderDTO.setOrderItems(orderItemDTOs);
+
+        // Clear cart after successful order placement
+        if (request.getClientId() != null) {
+            cartRepository.deleteByUserId(request.getClientId());
+        }
+
         return orderDTO;
     }
 }

@@ -6,8 +6,8 @@ import kn.org.deliverybackend.dto.response.cart.CartResponseDTO;
 import kn.org.deliverybackend.entity.Cart;
 import kn.org.deliverybackend.enumeration.StockStatus;
 import kn.org.deliverybackend.exception.ResourceNotFoundException;
+import kn.org.deliverybackend.mapper.CartMapper;
 import kn.org.deliverybackend.repository.CartRepository;
-import kn.org.deliverybackend.repository.ProductRepository;
 import kn.org.deliverybackend.repository.UsersRepository;
 import kn.org.deliverybackend.service.CartService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +25,7 @@ public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
     private final UsersRepository usersRepository;
+    private final CartMapper cartMapper;
 
     @Override
     @Transactional
@@ -131,21 +132,8 @@ public class CartServiceImpl implements CartService {
         return buildCartResponse(cartRepository.findByUserId(userId));
     }
 
-    // Map Cart entity to CartItemDTO with computed lineTotal
     private CartItemDTO toItemDTO(Cart cart) {
-        if (cart == null) return null;
-        BigDecimal lineTotal = cart.getUnitPrice()
-                .multiply(BigDecimal.valueOf(cart.getQuantity())); // unitPrice × quantity
-        return CartItemDTO.builder()
-                .cartItemId(cart.getId())
-                .productId(cart.getProductId()) // Long
-                .productName(cart.getProductName())
-                .imageUrl(cart.getImageUrl())
-                .quantity(cart.getQuantity())
-                .unitPrice(cart.getUnitPrice())
-                .lineTotal(lineTotal)
-                .stockStatus(cart.getStockStatus())
-                .build();
+        return cartMapper.toCartItemDTO(cart);
     }
 
     // Build cart response with item list, subtotal and grand total

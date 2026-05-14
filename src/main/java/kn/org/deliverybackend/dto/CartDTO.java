@@ -11,11 +11,11 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CartDTO {
 
-    private Long id;
+    private UUID id;
 
     private UUID userId;
 
-    private UUID productId;
+    private Long productId;
 
     private Long variantId;
 

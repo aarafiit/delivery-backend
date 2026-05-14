@@ -32,7 +32,12 @@ public class Cart extends AbstractBaseEntity<UUID> {
     @Column(precision = 19, scale = 4)
     private BigDecimal unitPrice;
 
+    private Long variantId;
+
     private Integer quantity;
+
+    @Column(length = 500)
+    private String deliveryInstructions;
 
     @Enumerated(EnumType.STRING)
     private StockStatus stockStatus;
