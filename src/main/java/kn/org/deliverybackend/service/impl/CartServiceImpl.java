@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -74,11 +73,8 @@ public class CartServiceImpl implements CartService {
     public CartItemDTO decrementQuantity(UUID userId, UUID cartItemId) {
         Cart cart = cartRepository.findByIdAndUserId(cartItemId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart item not found: " + cartItemId));
-        // At quantity 1, pressing minus removes the item; confirmation handled on client side
         if (cart.getQuantity() <= 1) {
-            cart.setDeleted(true);
-            cart.setDeletedAt(new Date());
-            cartRepository.save(cart);
+            cartRepository.delete(cart);
             return null; // null signals to controller that item was removed → 204
         }
         cart.setQuantity(cart.getQuantity() - 1); // FR-07-04
@@ -90,9 +86,7 @@ public class CartServiceImpl implements CartService {
     public void removeCartItem(UUID userId, UUID cartItemId) {
         Cart cart = cartRepository.findByIdAndUserId(cartItemId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart item not found: " + cartItemId));
-        cart.setDeleted(true);
-        cart.setDeletedAt(new Date());
-        cartRepository.save(cart);
+        cartRepository.delete(cart);
     }
 
     @Override
@@ -132,6 +126,14 @@ public class CartServiceImpl implements CartService {
         return buildCartResponse(cartRepository.findByUserId(userId));
     }
 
+    @Override
+    @Transactional
+    public void clearCart(UUID userId) {
+        usersRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+        cartRepository.deleteByUserId(userId);
+    }
+
     private CartItemDTO toItemDTO(Cart cart) {
         return cartMapper.toCartItemDTO(cart);
     }
@@ -144,7 +146,7 @@ public class CartServiceImpl implements CartService {
         // OOS items shown but excluded from subtotal (FR-07-13)
         BigDecimal subtotal = itemDTOs.stream()
                 .filter(i -> i.getStockStatus() != StockStatus.OUT_OF_STOCK)
-                .map(CartItemDTO::getLineTotal)
+                .map(i -> i.getLineTotal() != null ? i.getLineTotal() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         // Grand total equals subtotal at cart stage; delivery fee added at checkout (FR-07-06)
         return CartResponseDTO.builder()

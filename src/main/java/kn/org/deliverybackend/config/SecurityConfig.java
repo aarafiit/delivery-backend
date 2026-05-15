@@ -36,7 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/ws/**").permitAll()
                         // Admin endpoints require authentication
                         .requestMatchers("/admin/**").authenticated()
-                        .requestMatchers("/app/consumer/**").authenticated()
+                        .requestMatchers("/app/consumer/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 ->

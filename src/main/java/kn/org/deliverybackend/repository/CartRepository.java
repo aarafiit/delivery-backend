@@ -11,20 +11,16 @@ import java.util.UUID;
 @Repository
 public interface CartRepository extends JpaRepository<Cart, UUID> {
 
-    // Fetch all active (non-deleted) cart items for a user
-    @Query("SELECT c FROM Cart c WHERE c.userId = :userId AND c.deleted = false")
+    @Query("SELECT c FROM Cart c WHERE c.userId = :userId")
     List<Cart> findByUserId(UUID userId);
 
-    // Fetch a specific cart item by id and userId
-    @Query("SELECT c FROM Cart c WHERE c.id = :id AND c.userId = :userId AND c.deleted = false")
+    @Query("SELECT c FROM Cart c WHERE c.id = :id AND c.userId = :userId")
     Optional<Cart> findByIdAndUserId(UUID id, UUID userId);
 
-    // Check if a product already exists in the user's cart (used to avoid duplicates)
-    @Query("SELECT c FROM Cart c WHERE c.userId = :userId AND c.productId = :productId AND c.deleted = false")
+    @Query("SELECT c FROM Cart c WHERE c.userId = :userId AND c.productId = :productId")
     Optional<Cart> findByUserIdAndProductId(UUID userId, Long productId);
 
-    // Count total active cart items for bottom navigation badge (FR-07-12)
-    @Query("SELECT COUNT(c) FROM Cart c WHERE c.userId = :userId AND c.deleted = false")
+    @Query("SELECT COUNT(c) FROM Cart c WHERE c.userId = :userId")
     long countByUserId(UUID userId);
 
     void deleteByUserId(UUID userId);

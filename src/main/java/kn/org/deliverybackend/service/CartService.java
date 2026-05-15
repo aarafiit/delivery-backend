@@ -29,4 +29,7 @@ public interface CartService {
 
     // Merge locally stored guest cart items into user account cart after OTP login (FR-07-10)
     CartResponseDTO mergeGuestCart(UUID userId, List<AddToCartRequestDTO> guestItems);
+
+    // Clear all cart items for a user — called after successful order placement
+    void clearCart(UUID userId);
 }
