@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -70,13 +71,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO, MultipartFile image) {
+    public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO, MultipartFile[] images) {
         Product product = productMapper.toEntity(productRequestDTO);
 
-        if (image != null && !image.isEmpty()) {
-            String imageUrl = fileStorageService.uploadFile(image);
-            product.setImageUrl(imageUrl);
+        List<String> uploaded = uploadImages(images);
+        if (!uploaded.isEmpty()) {
+            product.setImageUrls(uploaded);
         }
+        // Primary image mirrors the first gallery image when not explicitly set
+        applyPrimaryImage(product);
 
         calculateAndSetDiscountPrice(product, productRequestDTO);
         if (productRequestDTO.getLowStockThreshold() != null) {
@@ -95,13 +98,18 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO, MultipartFile image) {
+    public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO, MultipartFile[] images) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
 
-        if (image != null && !image.isEmpty()) {
-            String imageUrl = fileStorageService.uploadFile(image);
-            product.setImageUrl(imageUrl);
+        // If new files are uploaded, they replace the existing gallery.
+        // Otherwise, if the request carries an explicit URL list, use that.
+        List<String> uploaded = uploadImages(images);
+        if (!uploaded.isEmpty()) {
+            product.setImageUrls(uploaded);
+            product.setImageUrl(uploaded.get(0));
+        } else if (productRequestDTO.getImageUrls() != null) {
+            product.setImageUrls(new ArrayList<>(productRequestDTO.getImageUrls()));
         }
 
         product.setCategoryId(productRequestDTO.getCategoryId());
@@ -113,6 +121,8 @@ public class ProductServiceImpl implements ProductService {
         if (productRequestDTO.getImageUrl() != null && !productRequestDTO.getImageUrl().isBlank()) {
             product.setImageUrl(productRequestDTO.getImageUrl());
         }
+        // Keep primary image consistent with the gallery
+        applyPrimaryImage(product);
         product.setIsAvailable(productRequestDTO.getIsAvailable());
         if (productRequestDTO.getUnit() != null) product.setUnit(productRequestDTO.getUnit());
         if (productRequestDTO.getLowStockThreshold() != null) {
@@ -133,6 +143,27 @@ public class ProductServiceImpl implements ProductService {
                     .ifPresent(cat -> dto.setCategoryName(cat.getName()));
         }
         return dto;
+    }
+
+    /** Uploads every non-empty file and returns the resulting URLs in order. */
+    private List<String> uploadImages(MultipartFile[] images) {
+        List<String> urls = new ArrayList<>();
+        if (images != null) {
+            for (MultipartFile image : images) {
+                if (image != null && !image.isEmpty()) {
+                    urls.add(fileStorageService.uploadFile(image));
+                }
+            }
+        }
+        return urls;
+    }
+
+    /** Ensures the primary imageUrl points at the first gallery image when not set. */
+    private void applyPrimaryImage(Product product) {
+        if ((product.getImageUrl() == null || product.getImageUrl().isBlank())
+                && product.getImageUrls() != null && !product.getImageUrls().isEmpty()) {
+            product.setImageUrl(product.getImageUrls().get(0));
+        }
     }
 
     private void calculateAndSetDiscountPrice(Product product, ProductRequestDTO dto) {

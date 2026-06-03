@@ -13,7 +13,7 @@ public interface ProductService {
     List<ProductResponseDTO> getAllProducts();
     Page<ProductResponseDTO> getProductsPaged(int page, int size);
     ProductResponseDTO getProductById(Long id);
-    ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO, MultipartFile image);
-    ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO, MultipartFile image);
+    ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO, MultipartFile[] images);
+    ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO, MultipartFile[] images);
     void deleteProduct(Long id);
 }

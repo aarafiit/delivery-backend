@@ -5,6 +5,8 @@ import kn.org.deliverybackend.entity.base.AbstractBaseEntity;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "product")
@@ -36,7 +38,15 @@ public class Product extends AbstractBaseEntity<Long> {
 
     private Long shopId;
 
+    // Primary/thumbnail image — kept for backward compatibility (mirrors imageUrls[0])
     private String imageUrl;
+
+    // Full image gallery. Stored in a separate collection table.
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "product_image", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "image_url", length = 1024)
+    @OrderColumn(name = "position")
+    private List<String> imageUrls = new ArrayList<>();
 
     private Boolean isAvailable;
 

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -35,6 +36,9 @@ public class ProductRequestDTO {
     private Long shopId;
 
     private String imageUrl;
+
+    // Optional pre-uploaded image URLs (e.g. on update when no new files are sent)
+    private List<String> imageUrls;
 
     private String unit; // e.g. kg, packets, items, litre
 

@@ -49,17 +49,17 @@ public class ProductController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductResponseDTO> createProduct(
             @Valid @RequestPart("productRequestDTO") ProductRequestDTO productRequestDTO,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
+            @RequestPart(value = "images", required = false) MultipartFile[] images) {
 
-        return ResponseEntity.ok(productService.createProduct(productRequestDTO, image));
+        return ResponseEntity.ok(productService.createProduct(productRequestDTO, images));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductResponseDTO> updateProduct(
             @PathVariable Long id,
             @Valid ProductRequestDTO productRequestDTO,
-            @RequestParam(value = "image", required = false) MultipartFile image) {
-        return ResponseEntity.ok(productService.updateProduct(id, productRequestDTO, image));
+            @RequestParam(value = "images", required = false) MultipartFile[] images) {
+        return ResponseEntity.ok(productService.updateProduct(id, productRequestDTO, images));
     }
 
     @DeleteMapping("/{id}")
