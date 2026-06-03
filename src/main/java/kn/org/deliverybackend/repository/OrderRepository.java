@@ -50,4 +50,16 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     @Query("SELECT o FROM Order o WHERE o.orderStatus = :status AND o.deleted = false ORDER BY o.createdAt DESC")
     List<Order> findByOrderStatus(@Param("status") String status);
+
+    @Query(value = "SELECT * FROM orders o WHERE o.deleted = false AND (" +
+            "CAST(o.id AS text) ILIKE CONCAT('%', :q, '%') OR " +
+            "LOWER(o.order_status) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
+            "LOWER(o.delivery_address) LIKE LOWER(CONCAT('%', :q, '%'))) " +
+            "ORDER BY o.created_at DESC",
+            countQuery = "SELECT COUNT(*) FROM orders o WHERE o.deleted = false AND (" +
+                    "CAST(o.id AS text) ILIKE CONCAT('%', :q, '%') OR " +
+                    "LOWER(o.order_status) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
+                    "LOWER(o.delivery_address) LIKE LOWER(CONCAT('%', :q, '%')))",
+            nativeQuery = true)
+    Page<Order> searchAdmin(@Param("q") String q, Pageable pageable);
 }

@@ -2,7 +2,6 @@ package kn.org.deliverybackend.service.impl;
 
 import kn.org.deliverybackend.dto.UsersDTO;
 import kn.org.deliverybackend.entity.Users;
-import kn.org.deliverybackend.exception.DuplicateResourceException;
 import kn.org.deliverybackend.exception.ResourceNotFoundException;
 import kn.org.deliverybackend.mapper.AddressesMapper;
 import kn.org.deliverybackend.mapper.UsersMapper;

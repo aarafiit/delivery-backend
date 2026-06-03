@@ -21,4 +21,9 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
     @Query("SELECT r.rating, COUNT(r) FROM Review r WHERE r.productId = :productId AND r.deleted = false GROUP BY r.rating")
     List<Object[]> countByRatingForProduct(@Param("productId") Long productId);
+
+    @Query("SELECT r FROM Review r WHERE r.deleted = false AND " +
+            "LOWER(r.comment) LIKE LOWER(CONCAT('%', :q, '%')) " +
+            "ORDER BY r.createdAt DESC")
+    Page<Review> searchAdmin(@Param("q") String q, Pageable pageable);
 }

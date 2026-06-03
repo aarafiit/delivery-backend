@@ -3,7 +3,6 @@ package kn.org.deliverybackend.service.impl;
 import kn.org.deliverybackend.dto.*;
 import kn.org.deliverybackend.entity.OtpVerification;
 import kn.org.deliverybackend.entity.Users;
-import kn.org.deliverybackend.exception.DuplicateResourceException;
 import kn.org.deliverybackend.exception.ResourceNotFoundException;
 import kn.org.deliverybackend.repository.OtpVerificationRepository;
 import kn.org.deliverybackend.repository.UsersRepository;

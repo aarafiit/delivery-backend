@@ -1,7 +1,6 @@
 package kn.org.deliverybackend.service.impl;
 
 import kn.org.deliverybackend.dto.*;
-import kn.org.deliverybackend.dto.response.product.ProductResponseDTO;
 import kn.org.deliverybackend.entity.Category;
 import kn.org.deliverybackend.entity.Product;
 import kn.org.deliverybackend.entity.PromotionalBanner;

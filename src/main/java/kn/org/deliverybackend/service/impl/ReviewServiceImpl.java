@@ -7,7 +7,6 @@ import kn.org.deliverybackend.dto.response.review.ReviewResponseDTO;
 import kn.org.deliverybackend.entity.Order;
 import kn.org.deliverybackend.entity.Product;
 import kn.org.deliverybackend.entity.Review;
-import kn.org.deliverybackend.entity.Users;
 import kn.org.deliverybackend.exception.DuplicateResourceException;
 import kn.org.deliverybackend.exception.ResourceNotFoundException;
 import kn.org.deliverybackend.exception.UnauthorizedReviewException;
